@@ -1,0 +1,17 @@
+{
+  "name": "@radoslaw-medryk/react-curry",
+  "version": "0.1.0",
+  "module": "dist/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npm run build-js && npm run build-types",
+    "build-js": "babel src --out-dir dist --source-maps",
+    "build-types": "node build-types.js"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.1",
+    "@babel/preset-env": "^7.0.0"
+  }
+}
