@@ -2,13 +2,7 @@ function newMemoryNode() {
     return { f: null, map: new Map() };
 }
 
-function simpleCurry(func, ...args) {
-    return func.length === 0
-        ? () => func()
-        : (a1) => func(a1, ...args);
-}
-
-function getReusableCurry(memory, func, ...args) {
+function getReusableCurry(memory, func, args) {
     let node = memory;
     for (const arg of args) {
         const current = node.map.get(arg);
@@ -20,7 +14,7 @@ function getReusableCurry(memory, func, ...args) {
     }
 
     if (!node.f) {
-        node.f = simpleCurry(func, ...args);
+        node.f = func(...args);
     }
 
     return node.f;
@@ -28,5 +22,5 @@ function getReusableCurry(memory, func, ...args) {
 
 export function curry(func) {
     const memory = newMemoryNode();
-    return (...args) => getReusableCurry(memory, func, ...args);
+    return (...args) => getReusableCurry(memory, func, args);
 }

@@ -1,49 +1,57 @@
+// This code generates index.d.ts TypeScript type definitions file.
+// This script is part of library build process, executed when `npm run build` is ran.
+
 var fs = require("fs");
 
-var variants = 10;
+var paramsVariants = 2;
+var paramsCount = 10;
+var declarations = ["CurryFunc", "curry"];
 
-var declarations = ["Func", "CurryFunc", "curry"];
 var content = "";
 
-for (var x = 0; x < declarations.length; x++) {
-    var declaration = declarations[x];
+for (var declarationId = 0; declarationId < declarations.length; declarationId++) {
+    var declaration = declarations[declarationId];
 
-    for (var i = 0; i < variants; i++) {
-        var types = "TOut";
-        var funcArgs = "";
-        var curryArgs1 = "";
-        var curryArgs2 = "";
-    
-        for (var j = 1; j <= i; j++) {
-            types += (", T"+j);
-    
-            if (j === 1) {
-                funcArgs += "a1: T1";
-            } else if (j > 1) {
-                funcArgs += (", a"+j+": T"+j);
+    var maxSecondParamsCount = paramsVariants - 1;
+    for (var secondParamsCount = 0; secondParamsCount <= maxSecondParamsCount; secondParamsCount++) {
+        var maxFirstParamsCount = paramsCount - secondParamsCount;
+        for (var firstParamsCount = 0; firstParamsCount <= maxFirstParamsCount; firstParamsCount++) {
+            var currentParamsCount = firstParamsCount + secondParamsCount;
+            var types = "TOut";
+            for (var i = 1; i <= currentParamsCount; i++) {
+                types += ", T"+i;
             }
-    
-            if (j === 2) {
-                curryArgs1 = "a2: T2";
-            } else if (j > 2) {
-                curryArgs1 += (", a"+j+": T"+j);
+            
+            var firstParams = "";
+            for (var i = 1; i <= firstParamsCount; i++) {
+                if (i === 1) {
+                    firstParams += "p1: T1";
+                } else {
+                    firstParams += ", p"+i+": T"+i;
+                }
+            }
+
+            var secondParams = "";
+            for (var i = 1; i <= secondParamsCount; i++) {
+                var x = i + firstParamsCount;
+                if (i === 1) {
+                    secondParams += "p"+x+": T"+x;
+                } else {
+                    secondParams += ", p"+x+": T"+x;
+                }
+            }
+
+            var genericType = "CurryFunc"+firstParamsCount+"_"+secondParamsCount+"<"+types+">";
+
+            if (declaration === "CurryFunc") {
+                content += "export declare type "+genericType+" = ("+firstParams+") => ("+secondParams+") => TOut;\n";
+            } else {
+                content += "export declare function curry<"+types+">(func: "+genericType+"): "+genericType+";\n";
             }
         }
-    
-        if (i >= 1) {
-            curryArgs2 = "a1: T1";
-        }
-    
-        if (declaration === "Func") {
-            content += "export declare type Func"+i+"<"+types+"> = ("+funcArgs+") => TOut;\n";
-        } else if (declaration === "CurryFunc") {
-            content += "export declare type CurryFunc"+i+"<"+types+"> = ("+curryArgs1+") => ("+curryArgs2+") => TOut;\n";
-        } else {
-            content += "export declare function curry<"+types+">(func: Func"+i+"<"+types+">): CurryFunc"+i+"<"+types+">;\n";
-        }
+
+        content += "\n";
     }
-
-    content += "\n";
 }
 
 fs.writeFileSync("./dist/index.d.ts", content);
